@@ -232,6 +232,23 @@ func addState(l []*state, s *state, a *state) []*state {
 //************************************************************************************************************************************************************
 
 func main() {
-	
-	fmt.Println()
+    // TESTING
+    // InfixToPofix method Testing
+    /*
+	// Answer: ab.c*.
+    fmt.Println("Infix:   ", "a.b.c*")
+    fmt.Println("Postfix(ab.c*.): ", InfixToPofix("a.b.c*"))
+
+    // Answer: abd|.*
+    fmt.Println("Infix:   ", "(a.(b|d))*")
+    fmt.Println("Postfix(abd|.*): ", InfixToPofix("(a.(b|d))*"))
+
+    // Answer: abd|.c*
+    fmt.Println("Infix:   ", "(a.(b|d)).c*")
+    fmt.Println("Postfix(abd|.c*): ", InfixToPofix("(a.(b|d)).c*"))
+    
+    // Answer: abb.+.c.
+    fmt.Println("Infix:   ", "a.(b.b)+.c")
+    fmt.Println("Postfix(abb.+.c.): ", InfixToPofix("a.(b.b)+.c"))
+    */
 } // main

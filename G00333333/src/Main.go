@@ -73,9 +73,41 @@ func PofixToNfa(postfix string) *nfa {
 			// and points to the new accept state at edge2
 			initial := state{edge1: frag.initial, edge2: &accept}
 			// join the fragment edge1 to it's initial state
-			frag.accept.edge1 = frag.initial
+			frag.initial.edge1 = frag.initial
 			// join the fragment edge2 to the new accept state
 			frag.accept.edge2 = &accept
+
+			// then we append the new nfa accept state and initial state we created above to the nfastack
+            nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+        case '?':
+			// get the last thing off the stack and store in frag1
+			frag := nfastack[len(nfastack)-1]
+			// get rid of the last thing on the stack, because it's already on frag1
+			nfastack = nfastack[:len(nfastack)-1]
+
+			accept := state{}
+			// the new initial state that points to the initial of the fragment at edge1
+			// and points to the new accept state at edge2
+			initial := state{edge1: frag.initial, edge2: &accept}
+			// join the fragment edge1 to the new accept state
+			frag.accept.edge1 = &accept
+
+			// then we append the new nfa accept state and initial state we created above to the nfastack
+            nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+        case '+':
+			// get the last thing off the stack and store in frag1
+			frag := nfastack[len(nfastack)-1]
+			// get rid of the last thing on the stack, because it's already on frag1
+			nfastack = nfastack[:len(nfastack)-1]
+
+			accept := state{}
+			// the new initial state that points to the initial of the fragment at edge1
+			// and points to the new accept state at edge2
+            initial := state{edge1: frag.initial}
+            // a middle state
+            middle := state{edge1: frag.initial, edge2: &accept}
+			// join the fragment edge1 to the middle state
+			frag.accept.edge1 = &middle
 
 			// then we append the new nfa accept state and initial state we created above to the nfastack
 			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
@@ -102,7 +134,7 @@ func PofixToNfa(postfix string) *nfa {
 //		Shunting Yard Algorithm
 func InfixToPofix(infix string) string {
     // creating a map of special characters and assigning them a value
-    specials := map[rune]int{'*': 10, '.': 9, '|': 8}
+    specials := map[rune]int{'+': 12, '?': 11, '*': 10, '.': 9, '|': 8}
 
     // a rune is a character as it's displayed on the screen (utf8)
     postfix := []rune{} // initialise an array of runes
@@ -233,28 +265,27 @@ func addState(l []*state, s *state, a *state) []*state {
 
 func main() {
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     // TESTING
-    // PofixToNfa, PofixMatch and addState method testing
     /*
+    // '+' and '?' operator tests
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", ""))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "c"))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "cc"))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "a"))
+
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", ""))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", "c"))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", "cc"))
+
+    // PofixToNfa, PofixMatch and addState method testing
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "000"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "ab0"))
     fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", "ab"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "abc"))
     fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", ""))
     fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", "ccc"))
-    */
+
     // InfixToPofix method Testing
-    /*
 	// Answer: ab.c*.
     fmt.Println("Infix:   ", "a.b.c*")
     fmt.Println("Postfix(ab.c*.): ", InfixToPofix("a.b.c*"))
@@ -267,5 +298,17 @@ func main() {
     // Answer: abb.+.c.
     fmt.Println("Infix:   ", "a.(b.b)+.c")
     fmt.Println("Postfix(abb.+.c.): ", InfixToPofix("a.(b.b)+.c"))
+    // Answer: ab.c?.
+    fmt.Println("Infix:   ", "a.b.c?")
+    fmt.Println("Postfix(ab.c?.): ", InfixToPofix("a.b.c?"))
+    // Answer: abd|.+
+    fmt.Println("Infix:   ", "(a.(b|d))+")
+    fmt.Println("Postfix(abd|.+): ", InfixToPofix("(a.(b|d))+"))
+    // Answer: abd|.c?+
+    fmt.Println("Infix:   ", "(a.(b|d)).c+?")
+    fmt.Println("Postfix(abd|.c?+): ", InfixToPofix("(a.(b|d)).c+?"))
+    // Answer: abb.*.c.?*+
+    fmt.Println("Infix:   ", "a.(b.b)*.c?*+")
+    fmt.Println("Postfix(abb.*.c.?*+): ", InfixToPofix("a.(b.b)*.c?*+"))
     */
 } // main

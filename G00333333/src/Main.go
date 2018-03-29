@@ -26,7 +26,7 @@ func PofixToNfa(postfix string) *nfa {
 	// loop throught the regular expression one rune at a time
 	for _, r := range postfix {
 		switch r {
-		case '.':
+		case '.':				// concatenate
 			// get the last thing off the stack and store in frag2
 			frag2 := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag2
@@ -42,7 +42,7 @@ func PofixToNfa(postfix string) *nfa {
 
 			// then we append the new nfa we created above to the nfastack
 			nfastack = append(nfastack, &nfa{initial: frag1.initial, accept: frag2.accept})
-		case '|':
+		case '|':				// one or the other
 			// get the last thing off the stack and store in frag2
 			frag2 := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag2
@@ -62,7 +62,7 @@ func PofixToNfa(postfix string) *nfa {
 
 			// then we append the new nfa accept state and initial state we created above to the nfastack
 			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
-		case '*':
+		case '*':				// zero or more of
 			// get the last thing off the stack and store in frag1
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
@@ -79,7 +79,7 @@ func PofixToNfa(postfix string) *nfa {
 
 			// then we append the new nfa accept state and initial state we created above to the nfastack
             nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
-        case '?':
+        case '?':				// zero or one of
 			// get the last thing off the stack and store in frag1
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
@@ -94,7 +94,41 @@ func PofixToNfa(postfix string) *nfa {
 
 			// then we append the new nfa accept state and initial state we created above to the nfastack
             nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
-        case '+':
+        case '+':				// one or more of
+			// get the last thing off the stack and store in frag1
+			frag := nfastack[len(nfastack)-1]
+			// get rid of the last thing on the stack, because it's already on frag1
+			nfastack = nfastack[:len(nfastack)-1]
+
+			accept := state{}
+			// the new initial state that points to the initial of the fragment at edge1
+			// and points to the new accept state at edge2
+            initial := state{edge1: frag.initial}
+            // a middle state
+            middle := state{edge1: frag.initial, edge2: &accept}
+			// join the fragment edge1 to the middle state
+			frag.accept.edge1 = &middle
+
+			// then we append the new nfa accept state and initial state we created above to the nfastack
+			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+		case '^':				// starts with
+			// get the last thing off the stack and store in frag1
+			frag := nfastack[len(nfastack)-1]
+			// get rid of the last thing on the stack, because it's already on frag1
+			nfastack = nfastack[:len(nfastack)-1]
+
+			accept := state{}
+			// the new initial state that points to the initial of the fragment at edge1
+			// and points to the new accept state at edge2
+            initial := state{edge1: frag.initial}
+            // a middle state
+            middle := state{edge1: frag.initial, edge2: &accept}
+			// join the fragment edge1 to the middle state
+			frag.accept.edge1 = &middle
+
+			// then we append the new nfa accept state and initial state we created above to the nfastack
+			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+		case '$':				// ends with
 			// get the last thing off the stack and store in frag1
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
@@ -134,7 +168,7 @@ func PofixToNfa(postfix string) *nfa {
 //		Shunting Yard Algorithm
 func InfixToPofix(infix string) string {
     // creating a map of special characters and assigning them a value
-    specials := map[rune]int{'+': 12, '?': 11, '*': 10, '.': 9, '|': 8}
+    specials := map[rune]int{'$': 13, '+': 12, '?': 11, '*': 10, '.': 9, '|': 8, '^': 7}
 
     // a rune is a character as it's displayed on the screen (utf8)
     postfix := []rune{} // initialise an array of runes
@@ -160,7 +194,7 @@ func InfixToPofix(infix string) string {
                     stack = stack[:len(stack)-1]
                 }// for
 
-                // make s equal to everything in s, except for the last character
+                // make the stack equal to everything in the stack, except for the last character
                 // this discards the open bracket
                 stack = stack[:len(stack)-1]
 

@@ -33,11 +33,11 @@ func PofixToNfa(postfix string) *nfa {
 		case '.':				// concatenate
 			// get the last thing off the stack and store in frag2
 			frag2 := nfastack[len(nfastack)-1]
-			// get rid of the last thing on the stack, because it's already on frag2
+			// get rid of the last thing on the stack, because it's already in frag2
 			nfastack = nfastack[:len(nfastack)-1]
 			// get the last thing off the stack and store in frag1
 			frag1 := nfastack[len(nfastack)-1]
-			// get rid of the last thing on the stack, because it's already on frag1
+			// get rid of the last thing on the stack, because it's already in frag1
 			nfastack = nfastack[:len(nfastack)-1]
 
 			// join the fragments together by setting the accept state of frag1
@@ -88,8 +88,6 @@ func PofixToNfa(postfix string) *nfa {
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
 			nfastack = nfastack[:len(nfastack)-1]
-			
-			fmt.Println(nfastack[len(nfastack)-1].initial.symbol)
 
 			accept := state{}
 			// the new initial state that points to the initial of the fragment at edge1
@@ -131,8 +129,11 @@ func PofixToNfa(postfix string) *nfa {
 
 			// then we append the new nfa accept state and initial state we created above to the startsWith stack
 			startsWith = append(startsWith, &nfa{initial: &initial, accept: &accept})
+
 			// prepending the new nfa to the start of the stack
 			nfastack = append(nfastack, startsWith[0])
+			// resetting the startsWith array
+			startsWith = startsWith[:len(startsWith)-1]
 		case '$':				// ends with
 			// get the last thing off the stack and store in frag
 			frag := nfastack[len(nfastack)-1]
@@ -159,7 +160,7 @@ func PofixToNfa(postfix string) *nfa {
 		} // switch
 	} // for
 
-	// comment here ********************
+	// if the endsWith and nfastack arrays are populated
 	if len(endsWith) > 0 && len(nfastack) > 0 {
 		// get the last thing off the stack and store in frag
 		frag := nfastack[len(nfastack)-1]
@@ -169,21 +170,23 @@ func PofixToNfa(postfix string) *nfa {
 		accept := state{}
 		// the new initial state that points to the initial of the fragment at edge1
         initial := state{edge1: frag.initial}
-		// the fragment is accepted on edge1
+		// the fragment, on edge 1, then points to the first position on the endsWith array
 		frag.initial.edge1 = endsWith[0].initial
-
+		// the endsWith array then points to the accept state
 		endsWith[0].accept = &accept
 
 		// appending the new nfa to the stack
 		nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})	
 	}// if
+	// if the endsWith array is populated
 	if len(endsWith) > 0 {
+		// return the endsWith array nfa
 		return endsWith[0]
-	}
+	}// if
 
+	// error handling, if the nfastack has more than one nfa
 	if len(nfastack) != 1 {
-		fmt.Println("Syntax Error, the regular expression compile statement is incorrect.")
-		// fmt.Println("Uh oh:", len(nfastack), nfastack)
+		fmt.Println("Error the NFA stack has been overloaded by ", len(nfastack)-1, ".")
 	} // if
 
 	// the only item will be the actual nfa that you want to return
@@ -196,35 +199,33 @@ func InfixToPofix(infix string) string {
     specials := map[rune]int{'$': 13, '+': 12, '?': 11, '*': 10, '.': 9, '^': 8, '|': 7}
 
     // a rune is a character as it's displayed on the screen (utf8)
-    postfix := []rune{} // initialise an array of runes
-    stack := []rune{}
+    postfix := []rune{} // initialise an empty array of runes
+    stack := []rune{} // initialise an empty array of runes
     
     // will loop through infix string, the first thing it will return is the character position
     // when you call range on infix, because it is a string, range converts each character to a rune
     for _, r := range infix {
         switch {
-            // the current character is an open bracket
-            // this is popped onto the basic rune stack
-            case r == '(':
+			case r == '(':
+				// the current character is an open bracket
+            	// this is popped onto the basic rune stack
                 stack = append(stack, r)
-
-            // the current character is a close bracket
-            // we need to loop through the stack until an open bracket is found 
-            // while we loop throught the stack any special characters need to be appended onto the postfix array
-            case r == ')':
+			case r == ')':
+				// the current character is a close bracket
+				// we need to loop through the stack until an open bracket is found 
+				// while we loop throught the stack any special characters need to be appended onto the postfix array
                 for stack[len(stack)-1] != '(' {
                     // append the special characters onto postfix array
                     postfix = append(postfix, stack[len(stack)-1])
                     // make s equal to everything in s, except for the last character
                     stack = stack[:len(stack)-1]
-                }// for
-
+				}// for
+				
                 // make the stack equal to everything in the stack, except for the last character
                 // this discards the open bracket
                 stack = stack[:len(stack)-1]
-
-            // the current character is in the specials map if anything other than 0 is returned
-            case specials[r] > 0:
+			case specials[r] > 0:
+				// the current character is in the specials map if anything other than 0 is returned
                 // while the stack still has elements on it 
                 // and the precedence of the current character that you are reading
                 // is less than the precedence of whatever is at the top of the stack
@@ -233,12 +234,12 @@ func InfixToPofix(infix string) string {
                     postfix = append(postfix, stack[len(stack)-1])
                     // make s equal to everything in s, except for the last character
                     stack = stack[:len(stack)-1]
-                }// for 
+				}// for 
+				
                 // append the current character onto the stack
                 stack = append(stack, r)
-
-            // take the character and append to the end of the array
-            default:
+			default:
+				// take the character and append to the end of the array
                 postfix = append(postfix, r)
         }// switch 
     }// for
@@ -255,11 +256,9 @@ func InfixToPofix(infix string) string {
     return string(postfix)
 }// InfixToPofix
 //************************************************************************************************************************************************************
-//      Regular Expression Engine
-func PofixMatch(po string, s string) bool {
+//      Regular Expression Matching Function
+func RegexMatch(po string, s string) bool {
 	ismatch := false
-
-	// should convert from infix to postfix here using the shunting algorithm
 
 	// creating a postfix nfa, based on the postfix string
 	ponfa := PofixToNfa(po)
@@ -278,19 +277,19 @@ func PofixMatch(po string, s string) bool {
 		for _, c := range current {
             // if the symbol of one of the states matches r
 			if c.symbol == r {
-                // the next state is is updated by calling the addState method
+                // the next state is updated by calling the addState method
 				next = addState(next[:], c.edge1, ponfa.accept)
 			} // if
 		} // inner for
 
-		// when a character is read set current to the values of next
+		// when a character is read, set current to the values of next
 		// and reset the next array to a blank state pointer array
 		current, next = next, []*state{}
 	} // outer for
 
 	// check to see if the postfix nfa's accept state is in current
 	for _, c := range current {
-        // if it is and accept state
+        // if it is and is an accept state
 		if c == ponfa.accept {
             // set the boolean value to true and break the loop
             ismatch = true
@@ -299,7 +298,7 @@ func PofixMatch(po string, s string) bool {
 	} // for
 
 	return ismatch
-}// PofixMatch
+}// RegexMatch
 //************************************************************************************************************************************************************
 //     Add State Helper Function
 func addState(l []*state, s *state, a *state) []*state {
@@ -323,34 +322,33 @@ func addState(l []*state, s *state, a *state) []*state {
 //************************************************************************************************************************************************************
 
 func main() {
-	
-	// TESTING
-	// 
-	fmt.Println("Should return 'true', returns: ", PofixMatch("c^ab..", "cab"))
-	fmt.Println("Should return 'true', returns: ", PofixMatch("b$", "b"))
-	fmt.Println("Should return 'true', returns: ", PofixMatch("en.d.$", "end"))
-	fmt.Println("Should return 'false', returns: ", PofixMatch("c^ab..", "crab"))
-	fmt.Println("Should return 'false', returns: ", PofixMatch("b$", "ub"))
-	fmt.Println("Should return 'false', returns: ", PofixMatch("en.d.$", "enl"))
+	// 						TESTING
+	// PofixToNfa, RegexMatch and addState method testing
+	// '^' starts with and '$' ends with operator tests
+	fmt.Println("Should return 'true', returns: ", RegexMatch("c^ab..", "cab"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("b$", "b"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("en.d.$", "end"))
+	fmt.Println("Should return 'false', returns: ", RegexMatch("c^ab..", "crab"))
+	fmt.Println("Should return 'false', returns: ", RegexMatch("b$", "ub"))
+	fmt.Println("Should return 'false', returns: ", RegexMatch("en.d.$", "enl"))
 
-	/*
 	// '+' and '?' operator tests
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "abcd"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "c"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "cc"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "a"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c?|", "c"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c?|", ""))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c+|", "c"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c+|", "cc"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c?|", "abcd"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c?|", "cc"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c?|", "a"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c+|", ""))
 
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", ""))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", "c"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c+|", "cc"))
-
-    // PofixToNfa, PofixMatch and addState method testing
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "000"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "ab0"))
-    fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", "ab"))
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c*|", "abc"))
-    fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", ""))
-    fmt.Println("Should return 'true', returns: ", PofixMatch("ab.c*|", "ccc"))
+    // '*', '|' and '.' operator tests 
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c*|", "000"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c*|", "ab0"))
+    fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", "ab"))
+    fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c*|", "abc"))
+    fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", ""))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", "ccc"))
 
     // InfixToPofix method Testing
 	// Answer: ab.c*.
@@ -370,12 +368,6 @@ func main() {
     fmt.Println("Postfix(ab.c?.): ", InfixToPofix("a.b.c?"))
     // Answer: abd|.+
     fmt.Println("Infix:   ", "(a.(b|d))+")
-    fmt.Println("Postfix(abd|.+): ", InfixToPofix("(a.(b|d))+"))
-    // Answer: abd|.c?+
-    fmt.Println("Infix:   ", "(a.(b|d)).c+?")
-    fmt.Println("Postfix(abd|.c?+): ", InfixToPofix("(a.(b|d)).c+?"))
-    // Answer: abb.*.c.?*+
-    fmt.Println("Infix:   ", "a.(b.b)*.c?*+")
-    fmt.Println("Postfix(abb.*.c.?*+): ", InfixToPofix("a.(b.b)*.c?*+"))
-    */
+	fmt.Println("Postfix(abd|.+): ", InfixToPofix("(a.(b|d))+"))
+	
 } // main

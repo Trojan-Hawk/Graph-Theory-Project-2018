@@ -23,6 +23,10 @@ func PofixToNfa(postfix string) *nfa {
 	// an array of pointers to nfa's, the curley braces denote we want an empty one
 	nfastack := []*nfa{}
 
+	// ends with and starts with placeholders
+	startsWith := []*nfa{}
+	endsWith  := []*nfa{}
+
 	// loop throught the regular expression one rune at a time
 	for _, r := range postfix {
 		switch r {
@@ -84,6 +88,8 @@ func PofixToNfa(postfix string) *nfa {
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
 			nfastack = nfastack[:len(nfastack)-1]
+			
+			fmt.Println(nfastack[len(nfastack)-1].initial.symbol)
 
 			accept := state{}
 			// the new initial state that points to the initial of the fragment at edge1
@@ -119,15 +125,12 @@ func PofixToNfa(postfix string) *nfa {
 
 			accept := state{}
 			// the new initial state that points to the initial of the fragment at edge1
-			// and points to the new accept state at edge2
             initial := state{edge1: frag.initial}
-            // a middle state
-            middle := state{edge1: frag.initial, edge2: &accept}
-			// join the fragment edge1 to the middle state
-			frag.accept.edge1 = &middle
+			// the fragment is accepted on edge1
+			frag.accept.edge1 = &accept
 
-			// then we append the new nfa accept state and initial state we created above to the nfastack
-			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+			// then we append the new nfa accept state and initial state we created above to the startsWith stack
+			startsWith = append(nfastack, &nfa{initial: &initial, accept: &accept})
 		case '$':				// ends with
 			// get the last thing off the stack and store in frag1
 			frag := nfastack[len(nfastack)-1]
@@ -136,15 +139,12 @@ func PofixToNfa(postfix string) *nfa {
 
 			accept := state{}
 			// the new initial state that points to the initial of the fragment at edge1
-			// and points to the new accept state at edge2
             initial := state{edge1: frag.initial}
-            // a middle state
-            middle := state{edge1: frag.initial, edge2: &accept}
-			// join the fragment edge1 to the middle state
-			frag.accept.edge1 = &middle
+			// the fragment is accepted on edge1
+			frag.accept.edge1 = &accept
 
-			// then we append the new nfa accept state and initial state we created above to the nfastack
-			nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
+			// then we append the new nfa accept state and initial state we created above to the endsWith stack
+			endsWith = append(nfastack, &nfa{initial: &initial, accept: &accept})
 		default:
 			// new empty accept state
 			accept := state{}
@@ -157,8 +157,23 @@ func PofixToNfa(postfix string) *nfa {
 		} // switch
 	} // for
 
+	// comment here ***********************
+	if len(startsWith) > 0 {
+		temp := startsWith
+		temp = append(nfastack)
+		nfastack = temp
+		// error handling here **********************
+	}// if
+
+	// comment here ********************
+	if len(endsWith) > 0 {
+		nfastack = append(nfastack, endsWith[0])
+		// error handling here ***************************
+	}// if
+
 	if len(nfastack) != 1 {
-		fmt.Println("Uh oh:", len(nfastack), nfastack)
+		fmt.Println("Syntax Error, the regular expression compile statement is incorrect.")
+		// fmt.Println("Uh oh:", len(nfastack), nfastack)
 	} // if
 
 	// the only item will be the actual nfa that you want to return
@@ -298,11 +313,13 @@ func addState(l []*state, s *state, a *state) []*state {
 //************************************************************************************************************************************************************
 
 func main() {
-    
+	
+	fmt.Println(PofixMatch("ab.c^|", ""))
+
     // TESTING
     /*
     // '+' and '?' operator tests
-    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", ""))
+    fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "abcd"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "c"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "cc"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "a"))

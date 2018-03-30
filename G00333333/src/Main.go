@@ -130,9 +130,11 @@ func PofixToNfa(postfix string) *nfa {
 			frag.accept.edge1 = &accept
 
 			// then we append the new nfa accept state and initial state we created above to the startsWith stack
-			startsWith = append(nfastack, &nfa{initial: &initial, accept: &accept})
+			startsWith = append(startsWith, &nfa{initial: &initial, accept: &accept})
+			// prepending the new nfa to the start of the stack
+			nfastack = append(nfastack, startsWith[0])
 		case '$':				// ends with
-			// get the last thing off the stack and store in frag1
+			// get the last thing off the stack and store in frag
 			frag := nfastack[len(nfastack)-1]
 			// get rid of the last thing on the stack, because it's already on frag1
 			nfastack = nfastack[:len(nfastack)-1]
@@ -144,7 +146,7 @@ func PofixToNfa(postfix string) *nfa {
 			frag.accept.edge1 = &accept
 
 			// then we append the new nfa accept state and initial state we created above to the endsWith stack
-			endsWith = append(nfastack, &nfa{initial: &initial, accept: &accept})
+			endsWith = append(endsWith, &nfa{initial: &initial, accept: &accept})
 		default:
 			// new empty accept state
 			accept := state{}
@@ -157,19 +159,27 @@ func PofixToNfa(postfix string) *nfa {
 		} // switch
 	} // for
 
-	// comment here ***********************
-	if len(startsWith) > 0 {
-		temp := startsWith
-		temp = append(nfastack)
-		nfastack = temp
-		// error handling here **********************
-	}// if
-
 	// comment here ********************
-	if len(endsWith) > 0 {
-		nfastack = append(nfastack, endsWith[0])
-		// error handling here ***************************
+	if len(endsWith) > 0 && len(nfastack) > 0 {
+		// get the last thing off the stack and store in frag
+		frag := nfastack[len(nfastack)-1]
+		// get rid of the last thing on the stack, because it's already on frag1
+		nfastack = nfastack[:len(nfastack)-1]
+
+		accept := state{}
+		// the new initial state that points to the initial of the fragment at edge1
+        initial := state{edge1: frag.initial}
+		// the fragment is accepted on edge1
+		frag.initial.edge1 = endsWith[0].initial
+
+		endsWith[0].accept = &accept
+
+		// appending the new nfa to the stack
+		nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})	
 	}// if
+	if len(endsWith) > 0 {
+		return endsWith[0]
+	}
 
 	if len(nfastack) != 1 {
 		fmt.Println("Syntax Error, the regular expression compile statement is incorrect.")
@@ -183,7 +193,7 @@ func PofixToNfa(postfix string) *nfa {
 //		Shunting Yard Algorithm
 func InfixToPofix(infix string) string {
     // creating a map of special characters and assigning them a value
-    specials := map[rune]int{'$': 13, '+': 12, '?': 11, '*': 10, '.': 9, '|': 8, '^': 7}
+    specials := map[rune]int{'$': 13, '+': 12, '?': 11, '*': 10, '.': 9, '^': 8, '|': 7}
 
     // a rune is a character as it's displayed on the screen (utf8)
     postfix := []rune{} // initialise an array of runes
@@ -314,11 +324,17 @@ func addState(l []*state, s *state, a *state) []*state {
 
 func main() {
 	
-	fmt.Println(PofixMatch("ab.c^|", ""))
+	// TESTING
+	// 
+	fmt.Println("Should return 'true', returns: ", PofixMatch("c^ab..", "cab"))
+	fmt.Println("Should return 'true', returns: ", PofixMatch("b$", "b"))
+	fmt.Println("Should return 'true', returns: ", PofixMatch("en.d.$", "end"))
+	fmt.Println("Should return 'false', returns: ", PofixMatch("c^ab..", "crab"))
+	fmt.Println("Should return 'false', returns: ", PofixMatch("b$", "ub"))
+	fmt.Println("Should return 'false', returns: ", PofixMatch("en.d.$", "enl"))
 
-    // TESTING
-    /*
-    // '+' and '?' operator tests
+	/*
+	// '+' and '?' operator tests
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "abcd"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "c"))
     fmt.Println("Should return 'false', returns: ", PofixMatch("ab.c?|", "cc"))

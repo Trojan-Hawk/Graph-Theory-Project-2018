@@ -11,7 +11,7 @@ type state struct {
 	edge2  *state
 } // state struct
 
-// helper struct
+// nfa struct
 type nfa struct {
 	initial *state
 	accept  *state
@@ -76,10 +76,10 @@ func PofixToNfa(postfix string) *nfa {
 			// the new initial state that points to the initial of the fragment at edge1
 			// and points to the new accept state at edge2
 			initial := state{edge1: frag.initial, edge2: &accept}
-			// join the fragment edge1 to it's initial state
-			frag.initial.edge1 = frag.initial
-			// join the fragment edge2 to the new accept state
-			frag.accept.edge2 = &accept
+			// join the fragment edge1 to the new accept state
+			frag.accept.edge1 = &accept
+			// join the fragment edge2 to the new initial state
+			frag.accept.edge2 = &initial
 
 			// then we append the new nfa accept state and initial state we created above to the nfastack
             nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
@@ -348,7 +348,9 @@ func main() {
     fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", "ab"))
     fmt.Println("Should return 'false', returns: ", RegexMatch("ab.c*|", "abc"))
     fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", ""))
-	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", "ccc"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("ab.c*|", "c"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("c*", "cc"))
+	fmt.Println("Should return 'true', returns: ", RegexMatch("c*", "ccc"))
 
     // InfixToPofix method Testing
 	// Answer: ab.c*.

@@ -1,10 +1,10 @@
-				
+--------------------------------------------------------------------
 				Graph Theory Project 2018
-				
+--------------------------------------------------------------------		
 	Author: Timothy Cassidy		Student No: G00333333
-	
+--------------------------------------------------------------------
 				How to run the program
-			
+--------------------------------------------------------------------
 	To run the program you need to clone or download the 
 	repository to your local machine. The link below will 
 	show you how to do this:
@@ -24,11 +24,10 @@
 	program on the terminal window. The program already has
 	multiple test cases for each operator. More can be added
 	if needed but I thought the test cases provided are 
-	sufficient.
-	
-	
-	The project is split up in the following way:
-	
+	sufficient. The project is split up in the following way:
+--------------------------------------------------------------------
+				PofixToNfa Function
+--------------------------------------------------------------------
 	The 'PofixToNfa' function parses a postfix string and 
 	creates an Non-Deterministic Finite Automata based on
 	it. It does so by first using two structs which are 
@@ -72,43 +71,68 @@
 	appended to the nfastack.
 	
 	The third case is entered when the rune is equal to the 
-	'*' character
+	'*' character. This case will pull a fragment from the
+	nfastack, named frag, then the last item on the stack 
+	is removed because it is stored in the frag variable. Two
+	new states are made an initial and an accept state, this 
+	new initial state points to frag1's initial state at edge1 
+	and points to the new accept state at edge2. Next we make 
+	edge1 on frag point to the new accept state and edge2 point 
+	to the new initial state, then an nfa with the new initial 
+	state and the new accept state is appended to the nfastack.
 	
 	The fourth case is entered when the rune is equal to the 
-	'?' character
+	'?' character. This case will pull a fragment from the
+	nfastack, named frag, then the last item on the stack 
+	is removed because it is stored in the frag variable. Two
+	new states are made an initial and an accept state, this 
+	new initial state points to the fragment's initial state at 
+	edge1 and points to the new accept state at edge2. Next we 
+	make edge1 on frag point to the new accept state then an nfa 
+	with the new initial state and the new accept state is 
+	appended to the nfastack.
 	
 	The fifth case is entered when the rune is equal to the 
-	'+' character
+	'+' character. This case will pull a fragment from the
+	nfastack, named frag, then the last item on the stack 
+	is removed because it is stored in the frag variable. Three
+	new states are made an initial, an accept and a middle state, 
+	this new initial state points to the fragment's initial state 
+	at edge1 and the middle state points to the fragment's initial
+	state at edge1 and points to the new accept state at edge2. 
+	Next we make edge1 on frag point to the new middle state then 
+	an nfa with the new initial state and the new accept state is 
+	appended to the nfastack.
 	
 	The sixth case is entered when the rune is equal to the 
-	'^' character
+	'^' character. 
 	
 	The last case is entered when the rune is equal to the 
 	'$' character
-	
-	InfixToPofix
-	RegexMatch
-	addState
-	main
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+--------------------------------------------------------------------	
+				InfixToPofix Function
+--------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------
+				RegexMatch Function
+--------------------------------------------------------------------	
+
+
+
+--------------------------------------------------------------------
+				addState Function
+--------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------
+				main Method
+--------------------------------------------------------------------
+
+
+
+--------------------------------------------------------------------
+						**END OF README**
+--------------------------------------------------------------------

@@ -1,9 +1,9 @@
 --------------------------------------------------------------------
-				Graph Theory Project 2018
+		Graph Theory Project 2018
 --------------------------------------------------------------------		
 	Author: Timothy Cassidy		Student No: G00333333
 --------------------------------------------------------------------
-				How to run the program
+		How to run the program
 --------------------------------------------------------------------
 
 	To run the program you need to clone or download the 
@@ -28,7 +28,7 @@
 	sufficient. The project is split up in the following way:
 
 --------------------------------------------------------------------
-				PofixToNfa Function
+		PofixToNfa Function
 --------------------------------------------------------------------
 	
 	The 'PofixToNfa' function parses a postfix string and 
@@ -164,7 +164,7 @@
 	position 0.
 	
 --------------------------------------------------------------------	
-				InfixToPofix Function
+		InfixToPofix Function
 --------------------------------------------------------------------
 
 	This method I first declared a map of special characters and 
@@ -202,7 +202,7 @@
 	then returned.
 	
 --------------------------------------------------------------------
-				RegexMatch Function
+		RegexMatch Function
 --------------------------------------------------------------------	
 
 	The 'RegexMatch' function takes in two string parameters and
@@ -228,7 +228,7 @@
 	This function then returns the boolean.
 
 --------------------------------------------------------------------
-				addState Function
+		addState Function
 --------------------------------------------------------------------
 
 	The 'addState' function recursively parses through the nfa
@@ -239,7 +239,7 @@
 	pointers.
 
 --------------------------------------------------------------------
-				main Method
+		main Method
 --------------------------------------------------------------------
 
 	The main method is called first when the program is run,
@@ -249,5 +249,5 @@
 	the main method would be removed and called upon externally.
 
 --------------------------------------------------------------------
-						**END OF README**
+			**END OF README**
 --------------------------------------------------------------------

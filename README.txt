@@ -51,10 +51,25 @@
 	seven different cases followed by a default statement.
 	
 	The first case is entered when the rune is equal to the 
-	'.' character
+	'.' character. This case will pull two fragments from the
+	nfastack, named frag1 and frag2, then the last two items
+	on the stack are removed because they are stored in the 
+	frag variables. Next the accept state on frag1 at edge1
+	is set to frag2's initial state and then an nfa with 
+	frag1's initial state and frag2's accept state is appended
+	to the nfastack.
 	
 	The second case is entered when the rune is equal to the 
-	'|' character
+	'|' character. This case will pull two fragments from the
+	nfastack, named frag1 and frag2, then the last two items
+	on the stack are removed because they are stored in the 
+	frag variables. Two new states are made an initial
+	and an accept state, this new initial state points to 
+	frag1's initial state at edge1 and points to frag2's 
+	initial state ate edge2. Next we make edge1 on both 
+	fragments point to the new accept state and then an nfa 
+	with the new initial state and the new accept state is 
+	appended to the nfastack.
 	
 	The third case is entered when the rune is equal to the 
 	'*' character

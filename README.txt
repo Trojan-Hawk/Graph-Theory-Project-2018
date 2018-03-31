@@ -205,19 +205,48 @@
 				RegexMatch Function
 --------------------------------------------------------------------	
 
-	The 
+	The 'RegexMatch' function takes in two string parameters and
+	returns a boolean. First a boolean is declared and 
+	initialised to false. Next the 'PofixToNfa' method is called
+	and the resulting nfa pointer is stored in the ponfa variable.
+	
+	Next two state pointer arrays are declared and initialised,
+	named current and next, the current array is populated by
+	calling the addState recursive method. Next is a nested for, 
+	the outer for loops through the string to check the regular 
+	expression against and the inner for checks to see if the 
+	the current states symbol is equal to the current
+	character, if so, the next state pointer array is updated 
+	by calling the addState recursive method. After the inner
+	for, inside the outer for, the current state pointer array 
+	is set to the next state pointer array. Then the next state 
+	pointer array is reset.
+	
+	After this is another for loop, this checks to see if the 
+	accept state for the nfa is located in the current array,
+	if so, the boolean is set to true and the loop is broken.
+	This function then returns the boolean.
 
 --------------------------------------------------------------------
 				addState Function
 --------------------------------------------------------------------
 
-
+	The 'addState' function recursively parses through the nfa
+	if the initial state is not the accept state and the initial
+	state symbol is not set, it then checks to see if edge2 
+	of this state is not a nil value, if so, the method is called
+	recursively again. The method returns an array of state 
+	pointers.
 
 --------------------------------------------------------------------
 				main Method
 --------------------------------------------------------------------
 
-
+	The main method is called first when the program is run,
+	this method contains multiple print lines displaying the 
+	functionality of the program. The main method is just for 
+	testing in this case, if the program was to be packaged 
+	the main method would be removed and called upon externally.
 
 --------------------------------------------------------------------
 						**END OF README**
